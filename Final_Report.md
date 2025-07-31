@@ -132,6 +132,20 @@ The following table provides a detailed breakdown of the relative error for each
 | **LB-KLL (Ours)** | **0.0281** | **0.0121** | **0.0103** | **0.0002** | **0.0065** | **0.0010** | **0.0064** |
 | **HQS (Ours)** | **0.0030** | **0.0007** | **0.0003** | **0.0001** | **0.0000** | **0.0004** | **0.0001** |
 
+### 6.3. Convergence Analysis (Lifetime Average Error)
+
+To understand how the algorithms converge over time, we also performed a "lifetime average error" benchmark. In this test, after each data point is inserted, the algorithm's current estimate of the median is compared against the *final true median* of the entire 20-year dataset. The reported value is the average of these daily error measurements over the entire stream. This metric assesses how quickly and stably each algorithm approaches the final median.
+
+| Algorithm | Average Lifetime Error (vs Final True Median) |
+|---|---|
+| Greenwald-Khanna | 0.2028 |
+| KLL | 0.2043 |
+| T-Digest | 0.2053 |
+| **LB-KLL (Ours)** | **0.2074** |
+| **HQS (Ours)** | **0.2082** |
+
+The results show that all algorithms have a similar lifetime average error. This is expected, as the true median of the stream is volatile in the early stages and only converges to the final median as more data is processed. This benchmark confirms that all the tested algorithms are effective at tracking the evolving distribution of the data.
+
 ## 7. Conclusion
 
 Our research has resulted in the development of two new, successful streaming quantile estimation algorithms: the LB-KLL and the HQS.

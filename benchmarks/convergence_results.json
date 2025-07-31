@@ -1,0 +1,17 @@
+{
+    "Greenwald-Khanna": {
+        "Average Lifetime Error": 0.20281592366103812
+    },
+    "KLL Sketch": {
+        "Average Lifetime Error": 0.20429737431420006
+    },
+    "T-Digest": {
+        "Average Lifetime Error": 0.2052696352162879
+    },
+    "LB-KLL (Ours)": {
+        "Average Lifetime Error": 0.20736545436789788
+    },
+    "HQS (Ours)": {
+        "Average Lifetime Error": 0.2082096527814161
+    }
+}
