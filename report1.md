@@ -6,7 +6,7 @@
 
 ## 1. Abstract
 
-This report details the performance of three streaming quantile estimation algorithms: the Greenwald-Khanna (GK) algorithm, the KLL (Karnin, Lang, and Liberty) sketch, and the t-digest. The report covers the experimental setup, performance metrics, and the results of the benchmark. The benchmark was performed on two datasets: a synthetic dataset of 1,000,000 random integers and a real-world dataset of 20 years of S&P 500 closing prices.
+This report details the performance of three streaming quantile estimation algorithms: the Greenwald-Khanna (GK) algorithm, the KLL (Karnin, Lang, and Liberty) sketch, and the t-digest. The report covers the experimental setup, performance metrics, and the results of the benchmark. The benchmark was performed on three datasets: a synthetic dataset of 1,000,000 random integers, a real-world dataset of 20 years of S&P 500 closing prices, and 20 years of daily average temperature data for New York City.
 
 ## 2. Algorithms
 
@@ -41,11 +41,13 @@ The benchmark was implemented in Python 3.9 and used the following libraries:
 *   `memory-profiler`
 *   `tdigest`
 *   `yfinance`
+*   `meteostat`
 
 The benchmark consists of the following steps:
-1.  Two datasets are used:
+1.  Three datasets are used:
     *   A stream of 1,000,000 random integers.
     *   A stream of 20 years of S&P 500 closing prices.
+    *   A stream of 20 years of daily average temperature data for New York City.
 2.  The stream is processed by the GK, KLL, and t-digest algorithms.
 3.  The following metrics are collected:
     *   Time to insert all items.
@@ -71,8 +73,16 @@ The benchmark consists of the following steps:
 | KLL | 0.0017 | 113.49 | 0.0009 | 0.0024 | 0.0009 |
 | T-Digest | 0.2383 | 114.24 | 0.0063 | 0.0004 | 0.0006 |
 
+### 4.3. JFK Airport Temperature Data (20 years)
+
+| Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) | p50 Error | p99 Error |
+|---|---|---|---|---|---|
+| Greenwald-Khanna | 0.0491 | 128.74 | 0.0002 | 0.0231 | 0.0070 |
+| KLL | 0.0021 | 128.74 | 0.0016 | 0.0077 | 0.0000 |
+| T-Digest | 0.0726 | 128.74 | 0.0040 | 0.0005 | 0.0005 |
+
 ## 5. Conclusion
 
-The results on the S&P 500 data are consistent with the results on the random data. The KLL sketch is the fastest algorithm for insertions, while the t-digest is the most accurate. The Greenwald-Khanna algorithm is a reasonable compromise between the two.
+The results are consistent across all three datasets. The KLL sketch is the fastest algorithm for insertions, while the t-digest is the most accurate. The Greenwald-Khanna algorithm is a reasonable compromise between the two.
 
-The choice of algorithm depends on the specific application. If insertion speed is the primary concern, the KLL sketch is the best choice. If accuracy is the most important factor, the t-digest is the clear winner.
+The choice of algorithm depends on the specific application. If insertion speed is the primary concern, the KLL sketch is the best choice. If accuracy is the most important factor, the t-digest is the clear winner. For a good balance of performance and accuracy, the Greenwald-Khanna algorithm is a viable option.

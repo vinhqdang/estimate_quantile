@@ -3,6 +3,8 @@ import sys
 from memory_profiler import memory_usage
 import numpy as np
 import yfinance as yf
+from meteostat import Point, Daily
+from datetime import datetime
 
 # Add the src directory to the Python path
 sys.path.append('src')
@@ -11,15 +13,9 @@ from streaming_quantile import StreamingQuantile
 from kll_sketch import KLL
 from tdigest import TDigest as PyTDigest
 
-def run_benchmark():
-    # Experimental parameters
+def run_benchmark_on_data(data, dataset_name):
+    print(f"\n--- Benchmarking on {dataset_name} data ---")
     quantiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
-    
-    # Get S&P 500 data
-    print("Downloading S&P 500 data...")
-    data = yf.download('^GSPC', start='2005-01-01', end='2025-01-01')['Close'].values.tolist()
-    data = [item for sublist in data for item in sublist]
-    print(f"Downloaded {len(data)} data points.")
 
     # --- Greenwald-Khanna ---
     print("\n--- Greenwald-Khanna ---")
@@ -118,4 +114,18 @@ def run_benchmark():
         print(f"p{int(q*100)} Error: {float(error):.4f}")
 
 if __name__ == '__main__':
-    run_benchmark()
+    # Get S&P 500 data
+    print("Downloading S&P 500 data...")
+    sp500_data = yf.download('^GSPC', start='2005-01-01', end='2025-01-01')['Close'].values.tolist()
+    sp500_data = [item for sublist in sp500_data for item in sublist]
+    print(f"Downloaded {len(sp500_data)} data points.")
+    run_benchmark_on_data(sp500_data, "S&P 500")
+
+    # Get weather data
+    print("\nDownloading weather data...")
+    start = datetime(2005, 1, 1)
+    end = datetime(2025, 1, 1)
+    jfk = Point(40.6413, -73.7781) # JFK Airport
+    weather_data = Daily(jfk, start, end).fetch()['tavg'].tolist()
+    print(f"Downloaded {len(weather_data)} data points.")
+    run_benchmark_on_data(weather_data, "JFK Airport Temperature")
