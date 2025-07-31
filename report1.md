@@ -6,7 +6,7 @@
 
 ## 1. Abstract
 
-This report details the performance of four streaming quantile estimation algorithms: the Greenwald-Khanna (GK) algorithm, the KLL (Karnin, Lang, and Liberty) sketch, the t-digest, and our own Hybrid Reservoir-Sketch (HRS) algorithm. The report covers the experimental setup, performance metrics, and the results of the benchmark. The benchmark was performed on two real-world datasets: 20 years of closing prices for 20 stocks and 20 years of daily average temperature data for 20 cities.
+This report details the performance of three streaming quantile estimation algorithms: the Greenwald-Khanna (GK) algorithm, the KLL (Karnin, Lang, and Liberty) sketch, and the t-digest. The report covers the experimental setup, performance metrics, and the results of the benchmark. The benchmark was performed on a real-world dataset of 20 years of closing prices for 20 different stocks.
 
 ## 2. Algorithms
 
@@ -28,10 +28,6 @@ The t-digest is another randomized algorithm that is designed to be fast and acc
 
 *Reference: Dunning, T., & Ertl, O. (2019). Computing extremely accurate quantiles using t-digests. arXiv preprint arXiv:1902.04023.*
 
-### 2.4. Hybrid Reservoir-Sketch (HRS)
-
-The HRS algorithm is a new hybrid model that we developed. It combines a KLL sketch with a reservoir sampler. The KLL sketch is used to get an approximate range for a given quantile, and then the reservoir sampler is used to refine the estimate using a small sample of true data points.
-
 ## 3. Experimental Setup
 
 The benchmark was performed on a machine with the following specifications:
@@ -45,13 +41,10 @@ The benchmark was implemented in Python 3.9 and used the following libraries:
 *   `memory-profiler`
 *   `tdigest`
 *   `yfinance`
-*   `meteostat`
 
 The benchmark consists of the following steps:
-1.  Two datasets are used:
-    *   A stream of 20 years of closing prices for 20 stocks.
-    *   A stream of 20 years of daily average temperature data for 20 cities.
-2.  The stream is processed by the GK, KLL, t-digest, and HRS algorithms.
+1.  A stream of 20 years of closing prices for 20 stocks is downloaded.
+2.  The stream is processed by the GK, KLL, and t-digest algorithms.
 3.  The following metrics are collected:
     *   Time to insert all items.
     *   Memory usage of the sketch.
@@ -67,21 +60,9 @@ The benchmark consists of the following steps:
 | Greenwald-Khanna | 1.3550 | 167.03 | 0.0004 | 0.0170 | 0.1371 |
 | KLL | 0.0346 | 167.88 | 0.0105 | 0.0023 | 0.0006 |
 | T-Digest | 3.2549 | 167.88 | 0.0066 | 0.0001 | 0.0001 |
-| HRS | 0.1281 | 167.88 | 0.0177 | 0.0088 | 0.1794 |
 
-### 4.2. 20 Cities Temperature Data
+## 5. Conclusion & Next Steps
 
-| Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) | p50 Error | p99 Error |
-|---|---|---|---|---|---|
-| Greenwald-Khanna | 1.1431 | 175.41 | 0.0003 | 0.0098 | 0.0366 |
-| KLL | 0.0490 | 176.29 | 0.0103 | 0.0049 | 0.0000 |
-| T-Digest | 1.5590 | 176.29 | 0.0066 | 0.0023 | 0.0001 |
-| HRS | 0.2097 | 176.29 | 0.0246 | 0.0098 | 0.1128 |
+The benchmark results on the consolidated financial dataset show a clear trade-off between insertion speed and accuracy. The KLL sketch is by far the fastest, but the t-digest provides the highest accuracy, especially for the 99th percentile.
 
-## 5. Conclusion
-
-Our attempt to create a new hybrid algorithm, HRS, was not successful in its current form. While the insertion time was competitive, the accuracy, especially at the 99th percentile, was significantly worse than the other algorithms. This is likely due to the simple refinement strategy we employed. A more sophisticated approach to combining the sketch and the reservoir is needed to improve the accuracy.
-
-Of the existing algorithms, the KLL sketch and the t-digest are the top performers. The KLL sketch is the fastest for insertions, while the t-digest is the most accurate. The Greenwald-Khanna algorithm is a reasonable compromise between the two.
-
-The choice of algorithm depends on the specific application. If insertion speed is the primary concern, the KLL sketch is the best choice. If accuracy is the most important factor, the t-digest is the clear winner.
+Our initial attempt at a hybrid algorithm (HRS) was unsuccessful, indicating that a more sophisticated approach is required. The project is now focused on researching a new model. The next step is to conduct a deeper review of recent literature to find a more promising architecture for a novel streaming quantile estimation algorithm.
