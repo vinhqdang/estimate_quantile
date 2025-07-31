@@ -103,6 +103,8 @@ Each algorithm was evaluated on the following metrics:
 
 ### 6.1. Performance Metrics
 
+The following table summarizes the performance of each algorithm in terms of speed and memory usage.
+
 | Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) |
 |---|---|---|---|
 | Greenwald-Khanna | 1.4280 | 166.45 | 0.0004 |
@@ -111,10 +113,9 @@ Each algorithm was evaluated on the following metrics:
 | **LB-KLL (Ours)** | **0.1186** | **166.68** | **0.0194** |
 | **HQS (Ours)** | **2.3376** | **167.93** | **0.0125** |
 
-![Insertion Time](benchmarks/insertion_time.png)
-![Memory Usage](benchmarks/memory_usage.png)
-
 ### 6.2. Relative Error
+
+The following table provides a detailed breakdown of the relative error for each algorithm across the full range of tested quantiles.
 
 | Algorithm | p1 Error | p5 Error | p25 Error | p50 Error | p75 Error | p95 Error | p99 Error |
 |---|---|---|---|---|---|---|---|
@@ -123,8 +124,6 @@ Each algorithm was evaluated on the following metrics:
 | T-Digest | 0.0030 | 0.0007 | 0.0009 | 0.0001 | 0.0002 | 0.0004 | 0.0001 |
 | **LB-KLL (Ours)** | **0.0281** | **0.0121** | **0.0103** | **0.0002** | **0.0065** | **0.0010** | **0.0064** |
 | **HQS (Ours)** | **0.0030** | **0.0007** | **0.0003** | **0.0001** | **0.0000** | **0.0004** | **0.0001** |
-
-![Relative Error](benchmarks/relative_error.png)
 
 ## 7. Conclusion
 
