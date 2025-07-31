@@ -72,13 +72,32 @@ Our research goal was to develop a new algorithm that could outperform the estab
 
 ## 5. Experimental Setup
 
+### 5.1. System Specifications
+
 The benchmark was performed on a machine with the following specifications:
 
 *   **OS:** Linux DESKTOP-1G1I5T8 6.6.87.2-microsoft-standard-WSL2
 *   **CPU:** AMD Ryzen 5 7530U with Radeon Graphics (12 CPUs)
 *   **Memory:** 6.7 GiB
 
-The benchmark was implemented in Python 3.9 and used the following libraries: `memory-profiler`, `tdigest`, and `yfinance`. A stream of 20 years of closing prices for 20 major stocks was downloaded, creating a dataset of 96,263 data points. Each algorithm was benchmarked for insertion time, memory usage, query time, and relative error at the p1, p5, p25, p50, p75, p95, and p99 quantiles.
+### 5.2. Dataset and Methodology
+
+The benchmark was implemented in Python 3.9 and used the following libraries: `memory-profiler`, `tdigest`, and `yfinance`.
+
+A single, large dataset was constructed by downloading historical daily closing prices for 20 major stocks. The tickers were:
+`AAPL`, `GOOG`, `MSFT`, `AMZN`, `META`, `TSLA`, `NVDA`, `JPM`, `JNJ`, `V`, `PG`, `UNH`, `HD`, `MA`, `BAC`, `DIS`, `PFE`, `XOM`, `CSCO`, `CVX`.
+
+The time period for the data was from **January 1, 2005, to January 1, 2025**. After removing non-trading days and any `NaN` values, this resulted in a single dataset of **96,263** data points.
+
+To simulate a real-world data stream, the daily closing prices were fed into each algorithm one by one, in chronological order.
+
+### 5.3. Evaluation Metrics
+
+Each algorithm was evaluated on the following metrics:
+*   **Insertion Time:** The total wall-clock time required to insert all 96,263 data points into the sketch.
+*   **Memory Usage:** The maximum resident memory of the algorithm's data structure after all insertions.
+*   **Query Time:** The total wall-clock time to perform queries for the 7 specified quantiles.
+*   **Relative Error:** The relative error for each quantile `q`, calculated as `|estimated_quantile - true_quantile| / true_quantile`. We evaluated the error at quantiles p1, p5, p25, p50, p75, p95, and p99.
 
 ## 6. Results
 
