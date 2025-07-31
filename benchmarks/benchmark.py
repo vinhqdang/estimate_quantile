@@ -12,6 +12,7 @@ from streaming_quantile import StreamingQuantile
 from kll_sketch import KLL
 from tdigest import TDigest as PyTDigest
 from lb_kll import LBKLL
+from hqs import HQS
 
 def run_benchmark_on_data(data, dataset_name):
     print(f"\n--- Benchmarking on {dataset_name} data ---")
@@ -142,6 +143,38 @@ def run_benchmark_on_data(data, dataset_name):
     for q in [0.5, 0.99]:
         true_quantile = np.quantile(data, q)
         estimated_quantile = lb_kll.query(q)
+        error = abs(estimated_quantile - true_quantile) / true_quantile
+        print(f"p{int(q*100)} Error: {float(error):.4f}")
+
+    # --- HQS ---
+    print("\n--- HQS ---")
+    hqs = HQS(k=200)
+    
+    # Measure insertion time
+    start_time = time.time()
+    for d in data:
+        hqs.insert(d)
+    end_time = time.time()
+
+    # Measure memory usage
+    mem_usage = memory_usage((lambda: hqs, ()))
+    
+    print(f"Insertion Time: {end_time - start_time:.4f}s")
+    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
+    
+    # Measure query time and accuracy
+    start_time = time.time()
+    for q in quantiles:
+        hqs.query(q)
+    end_time = time.time()
+    
+    print(f"Query Time: {end_time - start_time:.4f}s")
+    
+    # Calculate accuracy
+    data.sort()
+    for q in [0.5, 0.99]:
+        true_quantile = np.quantile(data, q)
+        estimated_quantile = hqs.query(q)
         error = abs(estimated_quantile - true_quantile) / true_quantile
         print(f"p{int(q*100)} Error: {float(error):.4f}")
 

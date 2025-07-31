@@ -1,6 +1,6 @@
 import unittest
 import random
-from src.streaming_quantile import StreamingQuantile
+from streaming_quantile import StreamingQuantile
 
 class TestStreamingQuantile(unittest.TestCase):
     def test_median_of_a_stream(self):

@@ -1,6 +1,6 @@
 import unittest
 import random
-from src.kll_sketch import KLL
+from kll_sketch import KLL
 
 class TestKLL(unittest.TestCase):
     def test_empty_sketch(self):
