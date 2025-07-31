@@ -1,4 +1,4 @@
-# A Study of Streaming Quantile Estimation Algorithms
+# A Study of Streaming Quantile Estimation Algorithms for Financial Data
 
 **Author:** Vinh
 **Email:** dqvinh87@gmail.com
@@ -6,7 +6,7 @@
 
 ## 1. Abstract
 
-This report presents a comprehensive study of streaming quantile estimation algorithms. We review three established algorithms: the Greenwald-Khanna (GK) algorithm, the KLL sketch, and the t-digest. We document our research process in developing a novel algorithm, which involved two unsuccessful attempts (the Hybrid Reservoir-Sketch and the Focused Quantile Sketch) and two successful models: the Logarithmic-Biased KLL (LB-KLL) and the Hybrid-Query Sketch (HQS). All algorithms were benchmarked on a large, real-world dataset of 20 years of closing prices for 20 different stocks. The results show that our new algorithms, the LB-KLL and HQS, provide compelling trade-offs between speed and accuracy, making them valuable contributions to the field.
+This report presents a comprehensive study of streaming quantile estimation algorithms, motivated by the need for accurate, high-speed analysis of financial data. We review three established algorithms: the Greenwald-Khanna (GK) algorithm, the KLL sketch, and the t-digest. We then chronicle our research process in developing a novel algorithm, which involved two unsuccessful attempts (the Hybrid Reservoir-Sketch and the Focused Quantile Sketch) and two successful models: the Logarithmic-Biased KLL (LB-KLL) and the Hybrid-Query Sketch (HQS). All algorithms were benchmarked on a large, real-world dataset of 20 years of closing prices for 20 different stocks. The results show that our new algorithms, the LB-KLL and HQS, provide compelling and practical trade-offs between speed and accuracy, making them valuable contributions for financial data analysis.
 
 ## 2. Introduction to Streaming Quantile Estimation
 
@@ -72,19 +72,38 @@ Our research goal was to develop a new algorithm that could outperform the estab
 
 ## 5. Experimental Setup
 
-... (content remains the same)
+The benchmark was performed on a machine with the following specifications:
+
+*   **CPU:** TBD
+*   **Memory:** TBD
+*   **OS:** TBD
+
+The benchmark was implemented in Python 3.9 and used the following libraries:
+
+*   `memory-profiler`
+*   `tdigest`
+*   `yfinance`
+
+The benchmark consists of the following steps:
+1.  A stream of 20 years of closing prices for 20 stocks is downloaded.
+2.  The stream is processed by the GK, KLL, t-digest, LB-KLL, and HQS algorithms.
+3.  The following metrics are collected:
+    *   Time to insert all items.
+    *   Memory usage of the sketch.
+    *   Time to query quantiles (0.01, 0.05, 0.25, 0.50, 0.75, 0.95, 0.99).
+    *   Accuracy of the quantile estimates compared to the true quantiles.
 
 ## 6. Results
 
 ### 6.1. 20 Stocks Data
 
-| Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) | p50 Error | p99 Error |
-|---|---|---|---|---|---|
-| Greenwald-Khanna | -0.1572 | 165.62 | 0.0004 | 0.0170 | 0.1371 |
-| KLL | 0.0297 | 165.66 | 0.0094 | 0.0083 | 0.0009 |
-| T-Digest | 4.7416 | 166.54 | 0.0058 | 0.0003 | 0.0001 |
-| **LB-KLL (Ours)** | **0.1075** | **165.66** | **0.0218** | **0.0000** | **0.0033** |
-| **HQS (Ours)** | **4.4972** | **166.54** | **0.0124** | **0.0103** | **0.0001** |
+| Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) | p1 Error | p5 Error | p25 Error | p50 Error | p75 Error | p95 Error | p99 Error |
+|---|---|---|---|---|---|---|---|---|---|---|
+| Greenwald-Khanna | 1.4280 | 166.45 | 0.0004 | 0.2061 | 0.1568 | 0.0300 | 0.0170 | 0.0236 | 0.0375 | 0.1371 |
+| KLL | 0.0326 | 166.68 | 0.0124 | 0.0851 | 0.0366 | 0.0020 | 0.0063 | 0.0072 | 0.0110 | 0.0121 |
+| T-Digest | 2.2957 | 167.93 | 0.0322 | 0.0030 | 0.0007 | 0.0009 | 0.0001 | 0.0002 | 0.0004 | 0.0001 |
+| **LB-KLL (Ours)** | **0.1186** | **166.68** | **0.0194** | **0.0281** | **0.0121** | **0.0103** | **0.0002** | **0.0065** | **0.0010** | **0.0064** |
+| **HQS (Ours)** | **2.3376** | **167.93** | **0.0125** | **0.0030** | **0.0007** | **0.0003** | **0.0001** | **0.0000** | **0.0004** | **0.0001** |
 
 ## 7. Conclusion
 

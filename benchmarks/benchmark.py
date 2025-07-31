@@ -16,167 +16,75 @@ from hqs import HQS
 
 def run_benchmark_on_data(data, dataset_name):
     print(f"\n--- Benchmarking on {dataset_name} data ---")
-    quantiles = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+    
+    algorithms = {
+        "Greenwald-Khanna": StreamingQuantile(epsilon=0.01),
+        "KLL Sketch": KLL(k=200),
+        "T-Digest": PyTDigest(),
+        "LB-KLL (Ours)": LBKLL(k=200),
+        "HQS (Ours)": HQS(k=200)
+    }
+    
+    results = {}
 
-    # --- Greenwald-Khanna ---
-    print("\n--- Greenwald-Khanna ---")
-    gk = StreamingQuantile(epsilon=0.01)
-    
-    # Measure insertion time
-    start_time = time.time()
-    for d in data:
-        gk.insert(d)
-    end_time = time.time()
-    
-    # Measure memory usage
-    mem_usage = memory_usage((lambda: gk, ()))
+    for name, algorithm in algorithms.items():
+        print(f"\n--- {name} ---")
+        
+        # Measure insertion time
+        start_time = time.time()
+        if name == "T-Digest" or name == "HQS (Ours)":
+            for d in data:
+                algorithm.tdigest.update(d) if name == "HQS (Ours)" else algorithm.update(d)
+        else:
+            for d in data:
+                algorithm.insert(d)
+        end_time = time.time()
+        insertion_time = end_time - start_time
+        
+        # Measure memory usage
+        mem_usage = memory_usage((lambda: algorithm, ()), interval=0.1, timeout=1)
+        
+        # Measure query time
+        query_quantiles = [0.01, 0.05, 0.25, 0.50, 0.75, 0.95, 0.99]
+        start_time = time.time()
+        for q in query_quantiles:
+            if name == "T-Digest" or name == "HQS (Ours)":
+                 algorithm.tdigest.percentile(q * 100) if name == "HQS (Ours)" else algorithm.percentile(q * 100)
+            else:
+                algorithm.query(q)
+        end_time = time.time()
+        query_time = end_time - start_time
 
-    print(f"Insertion Time: {end_time - start_time:.4f}s")
-    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
-    
-    # Measure query time and accuracy
-    start_time = time.time()
-    for q in quantiles:
-        gk.query(q)
-    end_time = time.time()
-    
-    print(f"Query Time: {end_time - start_time:.4f}s")
-    
-    # Calculate accuracy
-    data.sort()
-    for q in [0.5, 0.99]:
-        true_quantile = np.quantile(data, q)
-        estimated_quantile = gk.query(q)
-        error = abs(estimated_quantile - true_quantile) / true_quantile
-        print(f"p{int(q*100)} Error: {float(error):.4f}")
+        # Calculate accuracy
+        sorted_data = sorted(data)
+        errors = {}
+        for q in query_quantiles:
+            true_quantile = np.quantile(sorted_data, q)
+            if name == "T-Digest" or name == "HQS (Ours)":
+                estimated_quantile = algorithm.tdigest.percentile(q * 100) if name == "HQS (Ours)" else algorithm.percentile(q * 100)
+            else:
+                estimated_quantile = algorithm.query(q)
+            
+            if true_quantile > 0:
+                error = abs(estimated_quantile - true_quantile) / true_quantile
+            else:
+                error = 0
+            errors[q] = error
 
-    # --- KLL Sketch ---
-    print("\n--- KLL Sketch ---")
-    kll = KLL(k=200)
-    
-    # Measure insertion time
-    start_time = time.time()
-    for d in data:
-        kll.insert(d)
-    end_time = time.time()
+        results[name] = {
+            "Insertion Time (s)": insertion_time,
+            "Memory Usage (MiB)": max(mem_usage),
+            "Query Time (s)": query_time,
+            "Errors": errors
+        }
+        
+        print(f"Insertion Time: {insertion_time:.4f}s")
+        print(f"Memory Usage: {max(mem_usage):.2f} MiB")
+        print(f"Query Time: {query_time:.4f}s")
+        for q, error in errors.items():
+            print(f"p{int(q*100)} Error: {error:.4f}")
 
-    # Measure memory usage
-    mem_usage = memory_usage((lambda: kll, ()))
-    
-    print(f"Insertion Time: {end_time - start_time:.4f}s")
-    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
-    
-    # Measure query time and accuracy
-    start_time = time.time()
-    for q in quantiles:
-        kll.query(q)
-    end_time = time.time()
-    
-    print(f"Query Time: {end_time - start_time:.4f}s")
-    
-    # Calculate accuracy
-    data.sort()
-    for q in [0.5, 0.99]:
-        true_quantile = np.quantile(data, q)
-        estimated_quantile = kll.query(q)
-        error = abs(estimated_quantile - true_quantile) / true_quantile
-        print(f"p{int(q*100)} Error: {float(error):.4f}")
-
-    # --- T-Digest ---
-    print("\n--- T-Digest ---")
-    td = PyTDigest()
-    
-    # Measure insertion time
-    start_time = time.time()
-    for d in data:
-        td.update(d)
-    end_time = time.time()
-
-    # Measure memory usage
-    mem_usage = memory_usage((lambda: td, ()))
-    
-    print(f"Insertion Time: {end_time - start_time:.4f}s")
-    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
-    
-    # Measure query time and accuracy
-    start_time = time.time()
-    for q in quantiles:
-        td.percentile(q * 100)
-    end_time = time.time()
-    
-    print(f"Query Time: {end_time - start_time:.4f}s")
-    
-    # Calculate accuracy
-    data.sort()
-    for q in [0.5, 0.99]:
-        true_quantile = np.quantile(data, q)
-        estimated_quantile = td.percentile(q * 100)
-        error = abs(estimated_quantile - true_quantile) / true_quantile
-        print(f"p{int(q*100)} Error: {float(error):.4f}")
-
-    # --- LB-KLL ---
-    print("\n--- LB-KLL ---")
-    lb_kll = LBKLL(k=200)
-    
-    # Measure insertion time
-    start_time = time.time()
-    for d in data:
-        lb_kll.insert(d)
-    end_time = time.time()
-
-    # Measure memory usage
-    mem_usage = memory_usage((lambda: lb_kll, ()))
-    
-    print(f"Insertion Time: {end_time - start_time:.4f}s")
-    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
-    
-    # Measure query time and accuracy
-    start_time = time.time()
-    for q in quantiles:
-        lb_kll.query(q)
-    end_time = time.time()
-    
-    print(f"Query Time: {end_time - start_time:.4f}s")
-    
-    # Calculate accuracy
-    data.sort()
-    for q in [0.5, 0.99]:
-        true_quantile = np.quantile(data, q)
-        estimated_quantile = lb_kll.query(q)
-        error = abs(estimated_quantile - true_quantile) / true_quantile
-        print(f"p{int(q*100)} Error: {float(error):.4f}")
-
-    # --- HQS ---
-    print("\n--- HQS ---")
-    hqs = HQS(k=200)
-    
-    # Measure insertion time
-    start_time = time.time()
-    for d in data:
-        hqs.insert(d)
-    end_time = time.time()
-
-    # Measure memory usage
-    mem_usage = memory_usage((lambda: hqs, ()))
-    
-    print(f"Insertion Time: {end_time - start_time:.4f}s")
-    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
-    
-    # Measure query time and accuracy
-    start_time = time.time()
-    for q in quantiles:
-        hqs.query(q)
-    end_time = time.time()
-    
-    print(f"Query Time: {end_time - start_time:.4f}s")
-    
-    # Calculate accuracy
-    data.sort()
-    for q in [0.5, 0.99]:
-        true_quantile = np.quantile(data, q)
-        estimated_quantile = hqs.query(q)
-        error = abs(estimated_quantile - true_quantile) / true_quantile
-        print(f"p{int(q*100)} Error: {float(error):.4f}")
+    return results
 
 if __name__ == '__main__':
     # Get stock data
