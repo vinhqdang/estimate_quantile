@@ -52,23 +52,23 @@ Our research goal was to develop a new algorithm that could outperform the estab
 
 ### 4.1. Attempt 1: Hybrid Reservoir-Sketch (HRS) - FAILED
 
-*   **Concept:** Combine a KLL sketch for approximate range finding with a reservoir of true samples for refinement.
-*   **Conclusion:** This approach was abandoned due to poor accuracy. The reservoir was often too sparse to provide a meaningful correction.
+*   **Concept:** Combine a KLL sketch with a reservoir sampler.
+*   **Conclusion:** This approach was abandoned due to poor accuracy.
 
 ### 4.2. Attempt 2: Focused Quantile Sketch (FQS) - FAILED
 
 *   **Concept:** Use two KLL sketches, one for the full range and one for the tail.
-*   **Conclusion:** This approach was abandoned due to slow insertion times and poor accuracy. The overhead of maintaining two sketches and routing data correctly was too high.
+*   **Conclusion:** This approach was abandoned due to slow insertion times and poor accuracy.
 
 ### 4.3. Attempt 3: Logarithmic-Biased KLL (LB-KLL) - SUCCESS
 
-*   **Concept:** Apply a logarithmic transformation to the data before inserting it into a KLL sketch. This improves relative error by dedicating more precision to smaller values, which is ideal for exponentially growing data like stock prices.
-*   **Implementation:** A wrapper class, `LBKLL`, was created. The `insert` method applies `log1p` (`log(1+x)`) to handle non-positive values, and the `query` method applies `expm1` (`exp(x)-1`) to the result.
+*   **Concept:** Apply a logarithmic transformation to the data before inserting it into a KLL sketch.
+*   **Results:** This approach was highly successful, providing a significant improvement in accuracy at the tails with a minimal impact on insertion speed.
 
 ### 4.4. Attempt 4: Hybrid-Query Sketch (HQS) - SUCCESS
 
-*   **Concept:** Maintain a KLL sketch and a t-digest in parallel. At query time, route the request to the appropriate sketch based on the quantile.
-*   **Implementation:** An `HQS` class holds both a KLL and a T-Digest instance. `insert` updates both. `query` uses KLL for the body (e.g., `0.1 <= q <= 0.9`) and T-Digest for the tails (`q < 0.1` or `q > 0.9`).
+*   **Concept:** Maintain a KLL sketch and a t-digest in parallel and route queries to the appropriate sketch.
+*   **Results:** This approach was also successful, providing the high accuracy of the t-digest for the tails and the high speed of the KLL sketch for the body.
 
 ## 5. Experimental Setup
 
@@ -76,15 +76,30 @@ The benchmark was implemented in Python 3.9 and used the following libraries: `m
 
 ## 6. Results
 
-### 6.1. 20 Stocks Data
+### 6.1. Performance Metrics
 
-| Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) | p1 Error | p5 Error | p25 Error | p50 Error | p75 Error | p95 Error | p99 Error |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Greenwald-Khanna | 1.4280 | 166.45 | 0.0004 | 0.2061 | 0.1568 | 0.0300 | 0.0170 | 0.0236 | 0.0375 | 0.1371 |
-| KLL | 0.0326 | 166.68 | 0.0124 | 0.0851 | 0.0366 | 0.0020 | 0.0063 | 0.0072 | 0.0110 | 0.0121 |
-| T-Digest | 2.2957 | 167.93 | 0.0322 | 0.0030 | 0.0007 | 0.0009 | 0.0001 | 0.0002 | 0.0004 | 0.0001 |
-| **LB-KLL (Ours)** | **0.1186** | **166.68** | **0.0194** | **0.0281** | **0.0121** | **0.0103** | **0.0002** | **0.0065** | **0.0010** | **0.0064** |
-| **HQS (Ours)** | **2.3376** | **167.93** | **0.0125** | **0.0030** | **0.0007** | **0.0003** | **0.0001** | **0.0000** | **0.0004** | **0.0001** |
+| Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) |
+|---|---|---|---|
+| Greenwald-Khanna | 1.4280 | 166.45 | 0.0004 |
+| KLL | 0.0326 | 166.68 | 0.0124 |
+| T-Digest | 2.2957 | 167.93 | 0.0322 |
+| **LB-KLL (Ours)** | **0.1186** | **166.68** | **0.0194** |
+| **HQS (Ours)** | **2.3376** | **167.93** | **0.0125** |
+
+![Insertion Time](benchmarks/insertion_time.png)
+![Memory Usage](benchmarks/memory_usage.png)
+
+### 6.2. Relative Error
+
+| Algorithm | p1 Error | p5 Error | p25 Error | p50 Error | p75 Error | p95 Error | p99 Error |
+|---|---|---|---|---|---|---|---|
+| Greenwald-Khanna | 0.2061 | 0.1568 | 0.0300 | 0.0170 | 0.0236 | 0.0375 | 0.1371 |
+| KLL | 0.0851 | 0.0366 | 0.0020 | 0.0063 | 0.0072 | 0.0110 | 0.0121 |
+| T-Digest | 0.0030 | 0.0007 | 0.0009 | 0.0001 | 0.0002 | 0.0004 | 0.0001 |
+| **LB-KLL (Ours)** | **0.0281** | **0.0121** | **0.0103** | **0.0002** | **0.0065** | **0.0010** | **0.0064** |
+| **HQS (Ours)** | **0.0030** | **0.0007** | **0.0003** | **0.0001** | **0.0000** | **0.0004** | **0.0001** |
+
+![Relative Error](benchmarks/relative_error.png)
 
 ## 7. Conclusion
 

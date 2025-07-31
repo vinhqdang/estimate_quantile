@@ -1,5 +1,6 @@
 import time
 import sys
+import json
 from memory_profiler import memory_usage
 import numpy as np
 import yfinance as yf
@@ -30,13 +31,19 @@ def run_benchmark_on_data(data, dataset_name):
     for name, algorithm in algorithms.items():
         print(f"\n--- {name} ---")
         
+        # It's important to have a fresh copy of the data for sorting
+        run_data = list(data)
+
         # Measure insertion time
         start_time = time.time()
-        if name == "T-Digest" or name == "HQS (Ours)":
-            for d in data:
-                algorithm.tdigest.update(d) if name == "HQS (Ours)" else algorithm.update(d)
+        if name == "T-Digest":
+            for d in run_data:
+                algorithm.update(d)
+        elif name == "HQS (Ours)":
+             for d in run_data:
+                algorithm.insert(d)
         else:
-            for d in data:
+            for d in run_data:
                 algorithm.insert(d)
         end_time = time.time()
         insertion_time = end_time - start_time
@@ -48,20 +55,24 @@ def run_benchmark_on_data(data, dataset_name):
         query_quantiles = [0.01, 0.05, 0.25, 0.50, 0.75, 0.95, 0.99]
         start_time = time.time()
         for q in query_quantiles:
-            if name == "T-Digest" or name == "HQS (Ours)":
-                 algorithm.tdigest.percentile(q * 100) if name == "HQS (Ours)" else algorithm.percentile(q * 100)
+            if name == "T-Digest":
+                 algorithm.percentile(q * 100)
+            elif name == "HQS (Ours)":
+                algorithm.query(q)
             else:
                 algorithm.query(q)
         end_time = time.time()
         query_time = end_time - start_time
 
         # Calculate accuracy
-        sorted_data = sorted(data)
+        sorted_data = sorted(run_data)
         errors = {}
         for q in query_quantiles:
             true_quantile = np.quantile(sorted_data, q)
-            if name == "T-Digest" or name == "HQS (Ours)":
-                estimated_quantile = algorithm.tdigest.percentile(q * 100) if name == "HQS (Ours)" else algorithm.percentile(q * 100)
+            if name == "T-Digest":
+                estimated_quantile = algorithm.percentile(q * 100)
+            elif name == "HQS (Ours)":
+                estimated_quantile = algorithm.query(q)
             else:
                 estimated_quantile = algorithm.query(q)
             
@@ -97,4 +108,10 @@ if __name__ == '__main__':
     
     stock_data = [item for sublist in stock_data for item in sublist if not np.isnan(item)]
     print(f"Downloaded {len(stock_data)} data points.")
-    run_benchmark_on_data(stock_data, "20 Stocks")
+    
+    benchmark_results = run_benchmark_on_data(stock_data, "20 Stocks")
+    
+    with open('benchmarks/results.json', 'w') as f:
+        json.dump(benchmark_results, f, indent=4)
+        
+    print("\nBenchmark results saved to benchmarks/results.json")
