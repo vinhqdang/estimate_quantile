@@ -57,12 +57,14 @@ The benchmark consists of the following steps:
 
 | Algorithm | Insertion Time (s) | Memory Usage (MiB) | Query Time (s) | p50 Error | p99 Error |
 |---|---|---|---|---|---|
-| Greenwald-Khanna | 1.3550 | 167.03 | 0.0004 | 0.0170 | 0.1371 |
-| KLL | 0.0346 | 167.88 | 0.0105 | 0.0023 | 0.0006 |
-| T-Digest | 3.2549 | 167.88 | 0.0066 | 0.0001 | 0.0001 |
+| Greenwald-Khanna | 1.2602 | 166.16 | 0.0004 | 0.0170 | 0.1371 |
+| KLL | 0.0297 | 166.30 | 0.0081 | 0.0073 | 0.0053 |
+| T-Digest | 4.7029 | 167.17 | 0.0068 | 0.0001 | 0.0001 |
 
-## 5. Conclusion & Next Steps
+## 5. Conclusion & Future Work
 
-The benchmark results on the consolidated financial dataset show a clear trade-off between insertion speed and accuracy. The KLL sketch is by far the fastest, but the t-digest provides the highest accuracy, especially for the 99th percentile.
+This project has successfully benchmarked three popular streaming quantile estimation algorithms on a large, real-world financial dataset. The results show a clear trade-off between insertion speed and accuracy. The KLL sketch is the fastest, while the t-digest is the most accurate.
 
-Our initial attempt at a hybrid algorithm (HRS) was unsuccessful, indicating that a more sophisticated approach is required. The project is now focused on researching a new model. The next step is to conduct a deeper review of recent literature to find a more promising architecture for a novel streaming quantile estimation algorithm.
+Our attempts to create a new hybrid algorithm were unsuccessful, highlighting the difficulty of developing novel algorithms in this domain.
+
+Future work should focus on a deeper theoretical understanding of existing algorithms and their error bounds. A promising area of research is the development of algorithms that are specifically designed for financial data, which often has unique statistical properties.
