@@ -6,7 +6,7 @@
 
 ## 1. Abstract
 
-This report presents a comprehensive study of streaming quantile estimation algorithms, motivated by the need for accurate, high-speed analysis of financial data. We review three established algorithms: the Greenwald-Khanna (GK) algorithm, the KLL sketch, and the t-digest. We then chronicle our research process in developing novel algorithms, which involved two unsuccessful attempts (the Hybrid Reservoir-Sketch and the Focused Quantile Sketch) and two successful models: the Logarithmic-Biased KLL (LB-KLL) and the Hybrid-Query Sketch (HQS). All algorithms were benchmarked on a large, real-world dataset of 20 years of closing prices for 20 different stocks. The results show that our new algorithms, the LB-KLL and HQS, provide compelling and practical trade-offs between speed and accuracy, making them valuable contributions for financial data analysis.
+This report presents a comprehensive study of streaming quantile estimation algorithms, motivated by the need for accurate, high-speed analysis of financial data. We provide a detailed review of three established algorithms—the Greenwald-Khanna (GK) algorithm, the KLL sketch, and the t-digest—including their underlying mathematical principles. We then chronicle our research process in developing novel algorithms, which involved two unsuccessful attempts (the Hybrid Reservoir-Sketch and the Focused Quantile Sketch) and two successful models: the Logarithmic-Biased KLL (LB-KLL) and the Hybrid-Query Sketch (HQS). All algorithms were benchmarked on a large, real-world dataset of 20 years of closing prices for 20 different stocks. The results show that our new algorithms, the LB-KLL and HQS, provide compelling and practical trade-offs between speed and accuracy, making them valuable contributions for financial data analysis.
 
 ## 2. Introduction to Streaming Quantile Estimation
 
@@ -71,6 +71,12 @@ Our research goal was to develop a new algorithm that could outperform the estab
 *   **Results:** This approach was also successful, providing the high accuracy of the t-digest for the tails and the high speed of the KLL sketch for the body.
 
 ## 5. Experimental Setup
+
+The benchmark was performed on a machine with the following specifications:
+
+*   **OS:** Linux DESKTOP-1G1I5T8 6.6.87.2-microsoft-standard-WSL2
+*   **CPU:** AMD Ryzen 5 7530U with Radeon Graphics (12 CPUs)
+*   **Memory:** 6.7 GiB
 
 The benchmark was implemented in Python 3.9 and used the following libraries: `memory-profiler`, `tdigest`, and `yfinance`. A stream of 20 years of closing prices for 20 major stocks was downloaded, creating a dataset of 96,263 data points. Each algorithm was benchmarked for insertion time, memory usage, query time, and relative error at the p1, p5, p25, p50, p75, p95, and p99 quantiles.
 
