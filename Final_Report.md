@@ -93,10 +93,17 @@ To simulate a real-world data stream, the daily closing prices were fed into eac
 
 ### 5.3. Evaluation Metrics
 
-Each algorithm was evaluated on the following metrics:
+Each algorithm was evaluated on its **final-state accuracy** and performance. The methodology is as follows:
+
+1.  The entire stream of 96,263 data points is fed into the algorithm.
+2.  After the entire stream has been processed, the final state of the algorithm's internal summary is used for querying.
+3.  The true quantiles are calculated by sorting the complete, 96,263-point dataset.
+4.  The error is then calculated **once** for each target quantile by comparing the algorithm's final estimate against the true final value.
+
+The specific metrics collected were:
 *   **Insertion Time:** The total wall-clock time required to insert all 96,263 data points into the sketch.
 *   **Memory Usage:** The maximum resident memory of the algorithm's data structure after all insertions.
-*   **Query Time:** The total wall-clock time to perform queries for the 7 specified quantiles.
+*   **Query Time:** The total wall-clock time to perform queries for the 7 specified quantiles on the final summary.
 *   **Relative Error:** The relative error for each quantile `q`, calculated as `|estimated_quantile - true_quantile| / true_quantile`. We evaluated the error at quantiles p1, p5, p25, p50, p75, p95, and p99.
 
 ## 6. Results
