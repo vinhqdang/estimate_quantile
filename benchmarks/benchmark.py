@@ -9,6 +9,7 @@ sys.path.append('src')
 
 from streaming_quantile import StreamingQuantile
 from kll_sketch import KLL
+from tdigest import TDigest as PyTDigest
 
 def run_benchmark():
     # Experimental parameters
@@ -78,6 +79,37 @@ def run_benchmark():
     for q in [0.5, 0.99]:
         true_quantile = np.quantile(data, q)
         estimated_quantile = kll.query(q)
+        error = abs(estimated_quantile - true_quantile) / true_quantile
+        print(f"p{int(q*100)} Error: {error:.4f}")
+
+    # --- T-Digest ---
+    print("\n--- T-Digest ---")
+    td = PyTDigest()
+    
+    # Measure insertion time
+    start_time = time.time()
+    for d in data:
+        td.update(d)
+    end_time = time.time()
+
+    # Measure memory usage
+    mem_usage = memory_usage((lambda: td, ()))
+    
+    print(f"Insertion Time: {end_time - start_time:.4f}s")
+    print(f"Memory Usage: {mem_usage[0]:.2f} MiB")
+    
+    # Measure query time and accuracy
+    start_time = time.time()
+    for q in quantiles:
+        td.percentile(q * 100)
+    end_time = time.time()
+    
+    print(f"Query Time: {end_time - start_time:.4f}s")
+    
+    # Calculate accuracy
+    for q in [0.5, 0.99]:
+        true_quantile = np.quantile(data, q)
+        estimated_quantile = td.percentile(q * 100)
         error = abs(estimated_quantile - true_quantile) / true_quantile
         print(f"p{int(q*100)} Error: {error:.4f}")
 
