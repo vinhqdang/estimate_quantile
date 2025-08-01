@@ -24,7 +24,7 @@ This repository contains a research project on streaming quantile estimation alg
     git clone https://github.com/vinhqdang/estimate_quantile.git
     cd estimate_quantile
     ```
-2.  Create the Conda environment:
+2.  Create and activate the Conda environment:
     ```bash
     conda create -n quantile-estimation python=3.9 -y
     conda activate quantile-estimation

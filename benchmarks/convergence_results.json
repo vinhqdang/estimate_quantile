@@ -1,17 +1,23 @@
 {
     "Greenwald-Khanna": {
-        "Average Lifetime Error": 0.20281592366103812
+        "Average Lifetime Error": 0.20281589552438722
     },
     "KLL Sketch": {
-        "Average Lifetime Error": 0.20429737431420006
+        "Average Lifetime Error": 0.2000203354213014
     },
-    "T-Digest": {
-        "Average Lifetime Error": 0.2052696352162879
+    "River Quantile": {
+        "Average Lifetime Error": 0.22500401134286707
     },
     "LB-KLL (Ours)": {
-        "Average Lifetime Error": 0.20736545436789788
+        "Average Lifetime Error": 0.21012163250720062
     },
     "HQS (Ours)": {
-        "Average Lifetime Error": 0.2082096527814161
+        "Average Lifetime Error": 0.20545831548183752
+    },
+    "QRSketch (Ours)": {
+        "Average Lifetime Error": 0.2057439912817965
+    },
+    "TransformerSketch (Ours)": {
+        "Average Lifetime Error": 1.3653804481370517
     }
 }

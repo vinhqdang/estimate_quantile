@@ -1,3 +1,4 @@
+
 import time
 import sys
 import json
@@ -10,9 +11,11 @@ sys.path.append('src')
 
 from streaming_quantile import StreamingQuantile
 from kll_sketch import KLL
-from tdigest import TDigest as PyTDigest
+from river.stats import Quantile
 from lb_kll import LBKLL
 from hqs import HQS
+from qr_sketch import QRSketch
+from transformer_sketch import TransformerSketch
 
 def run_convergence_benchmark(data, dataset_name):
     print(f"\n--- Convergence Benchmark on {dataset_name} data ---")
@@ -24,9 +27,11 @@ def run_convergence_benchmark(data, dataset_name):
     algorithms = {
         "Greenwald-Khanna": StreamingQuantile(epsilon=0.01),
         "KLL Sketch": KLL(k=200),
-        "T-Digest": PyTDigest(),
+        "River Quantile": Quantile(),
         "LB-KLL (Ours)": LBKLL(k=200),
-        "HQS (Ours)": HQS(k=200)
+        "HQS (Ours)": HQS(k=200),
+        "QRSketch (Ours)": QRSketch(q=0.5),
+        "TransformerSketch (Ours)": TransformerSketch(q=0.5)
     }
     
     results = {}
@@ -39,18 +44,22 @@ def run_convergence_benchmark(data, dataset_name):
         # Process the stream day by day
         for i, d in enumerate(data):
             # Insert the new data point
-            if name == "T-Digest":
+            if name == "River Quantile":
                 algorithm.update(d)
             elif name == "HQS (Ours)":
                 algorithm.insert(d)
+            elif name == "QRSketch (Ours)" or name == "TransformerSketch (Ours)":
+                algorithm.add(d)
             else:
                 algorithm.insert(d)
 
             # Query the current estimated median
-            if name == "T-Digest":
-                estimated_median = algorithm.percentile(50)
+            if name == "River Quantile":
+                estimated_median = algorithm.get()
             elif name == "HQS (Ours)":
                 estimated_median = algorithm.query(0.5)
+            elif name == "QRSketch (Ours)" or name == "TransformerSketch (Ours)":
+                estimated_median = algorithm.quantile()
             else:
                 estimated_median = algorithm.query(0.5)
 

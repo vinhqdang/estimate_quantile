@@ -2,6 +2,14 @@
 
 This project aims to explore and develop algorithms for estimating quantiles and other statistical values from streaming data.
 
+## Environment Setup
+
+This project uses a dedicated conda environment. To activate it, run:
+
+```bash
+conda activate quantile-estimation
+```
+
 ## State-of-the-Art Review
 
 - **KLL (Karnin, Lang, and Liberty):** Randomized algorithm, considered the state-of-the-art due to its low memory footprint and high accuracy.
