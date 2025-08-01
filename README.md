@@ -9,6 +9,8 @@ This repository contains a research project on streaming quantile estimation alg
 *   **T-Digest:** A randomized algorithm that provides high accuracy, especially at the tails of the distribution.
 *   **LB-KLL (Ours):** A novel algorithm that uses a logarithmic transformation to improve the accuracy of the KLL sketch for financial data.
 *   **HQS (Ours):** A novel hybrid algorithm that combines the KLL sketch and the t-digest to provide both speed and accuracy.
+*   **QRSketch (Ours):** A model based on quantile regression that provides competitive accuracy.
+*   **TransformerSketch (Ours):** An experimental model using a transformer architecture to learn the data distribution.
 
 ## Getting Started
 
