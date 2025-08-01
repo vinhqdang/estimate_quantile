@@ -1,4 +1,3 @@
-
 import time
 import sys
 import json
@@ -15,7 +14,6 @@ from river.stats import Quantile
 from lb_kll import LBKLL
 from hqs import HQS
 from qr_sketch import QRSketch
-from transformer_sketch import TransformerSketch
 
 def run_convergence_benchmark(data, dataset_name):
     print(f"\n--- Convergence Benchmark on {dataset_name} data ---")
@@ -30,8 +28,7 @@ def run_convergence_benchmark(data, dataset_name):
         "River Quantile": Quantile(),
         "LB-KLL (Ours)": LBKLL(k=200),
         "HQS (Ours)": HQS(k=200),
-        "QRSketch (Ours)": QRSketch(q=0.5),
-        "TransformerSketch (Ours)": TransformerSketch(q=0.5)
+        "QRSketch (Ours)": QRSketch(q=0.5)
     }
     
     results = {}
@@ -48,7 +45,7 @@ def run_convergence_benchmark(data, dataset_name):
                 algorithm.update(d)
             elif name == "HQS (Ours)":
                 algorithm.insert(d)
-            elif name == "QRSketch (Ours)" or name == "TransformerSketch (Ours)":
+            elif name == "QRSketch (Ours)":
                 algorithm.add(d)
             else:
                 algorithm.insert(d)
@@ -58,7 +55,7 @@ def run_convergence_benchmark(data, dataset_name):
                 estimated_median = algorithm.get()
             elif name == "HQS (Ours)":
                 estimated_median = algorithm.query(0.5)
-            elif name == "QRSketch (Ours)" or name == "TransformerSketch (Ours)":
+            elif name == "QRSketch (Ours)":
                 estimated_median = algorithm.quantile()
             else:
                 estimated_median = algorithm.query(0.5)

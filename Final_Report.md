@@ -77,12 +77,6 @@ Our research goal was to develop a new algorithm that could outperform the estab
 *   **Model:** The model is an intercept-only quantile regression (`y ~ 1`), where `y` represents the values from the stream. For a given quantile `q`, the model directly fits the `q`-th quantile of the data. The estimated quantile is simply the fitted intercept of the model.
 *   **Results:** This approach proved to be surprisingly effective. The model provides accurate and stable estimates of the quantile, with performance comparable to the established, purpose-built algorithms. This demonstrates the potential of using general statistical models for streaming data analysis.
 
-### 4.6. Attempt 6: Transformer Sketch (TransformerSketch) - FAILED
-
-*   **Concept:** Employ a state-of-the-art deep learning model, a transformer, to learn the underlying distribution of the data and predict quantiles. The transformer's attention mechanism is well-suited for capturing long-range dependencies in sequential data, which is a key characteristic of financial time series.
-*   **Implementation:** We implemented a simple transformer encoder model using PyTorch. The model takes a sequence of recent data points as input and outputs a vector of quantile predictions. To handle the streaming setting, we used a sliding window approach, training the model on the 1000 most recent data points.
-*   **Results:** Despite the theoretical advantages of the transformer architecture, this approach was unsuccessful. The model exhibited a very high error rate in the benchmark, indicating that it failed to generalize to the streaming data. This is likely due to a combination of factors, including the simplicity of the model, the small size of the training window, and the inherent difficulty of training a complex model on a continuously evolving data distribution. This attempt highlights the challenges of applying deep learning models to streaming quantile estimation and suggests that more sophisticated architectures and training strategies are needed.
-
 ## 5. Experimental Setup
 
 ### 5.1. System Specifications
@@ -157,7 +151,6 @@ To understand how the algorithms converge over time, we also performed a "lifeti
 | **LB-KLL (Ours)** | **0.1984** |
 | **HQS (Ours)** | **0.1929** |
 | **QRSketch (Ours)** | **0.1935** |
-| **TransformerSketch (Ours)** | **1.3654** |
 
 The results show that all algorithms have a similar lifetime average error. This is expected, as the true median of the stream is volatile in the early stages and only converges to the final median as more data is processed. This benchmark confirms that all the tested algorithms are effective at tracking the evolving distribution of the data. The `QRSketch` algorithm, based on quantile regression, shows a competitive performance, with an error rate very close to the more specialized algorithms. This is a promising result for a general-purpose statistical model.
 
@@ -168,16 +161,5 @@ Our research has resulted in the development of two new, successful streaming qu
 *   The **LB-KLL** is an excellent general-purpose algorithm. It is nearly as fast as the standard KLL sketch but provides significantly better accuracy across the entire distribution, especially at the tails. It strikes an outstanding balance between speed and accuracy and is a strong candidate to replace KLL for financial data analysis.
 *   The **HQS** is a powerful specialist algorithm. While its insertion time is slow (dominated by the t-digest), it provides the best of both worlds at query time: fast, KLL-level performance for the body of the distribution, and t-digest-level accuracy for the tails. This makes it ideal for applications with mixed query patterns where tail accuracy is critical.
 *   The **QRSketch** demonstrates the viability of using machine learning models for quantile estimation. Its performance is comparable to the established algorithms, and it opens the door for further research into more sophisticated models.
-*   The **TransformerSketch** highlights the challenges of applying deep learning models to this problem. While transformers are powerful, they require careful tuning and large amounts of data to be effective. Our simple implementation was not able to compete with the more specialized algorithms, but it provides a starting point for future research.
 
 This project has demonstrated that by understanding the trade-offs of existing algorithms and the statistical properties of the data, it is possible to develop novel, hybrid algorithms that are highly effective for specific domains like financial analysis. Furthermore, the success of the `QRSketch` suggests that machine learning models are a promising avenue for future research in streaming quantile estimation.
-
-## 8. Future Work
-
-The results of this project suggest several promising directions for future research:
-
-*   **Improving the TransformerSketch:** The `TransformerSketch` could be improved by using a more sophisticated architecture, such as a larger model with more layers and attention heads. Additionally, a more advanced training scheme, such as a curriculum learning approach, could be used to help the model learn the evolving data distribution.
-*   **Exploring other deep learning models:** Other deep learning models, such as recurrent neural networks (RNNs) and long short-term memory (LSTM) networks, could also be applied to this problem. These models are well-suited for sequential data and may be able to capture the temporal dependencies in financial time series.
-*   **Developing a hybrid deep learning model:** A hybrid model that combines a deep learning model with a traditional streaming quantile algorithm could provide the best of both worlds. For example, a deep learning model could be used to learn a compact representation of the data, which is then fed into a KLL sketch or a t-digest.
-
-By exploring these and other research directions, we can continue to advance the state-of-the-art in streaming quantile estimation and develop new algorithms that are even more accurate, efficient, and robust.
